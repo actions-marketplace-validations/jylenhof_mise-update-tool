@@ -4,5 +4,3 @@ node_modules/
 # Local test artifacts
 .github_output_test
 coverage/
-
-dist/

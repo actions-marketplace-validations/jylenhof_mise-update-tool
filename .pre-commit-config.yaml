@@ -14,6 +14,7 @@ repos:
   - repo: builtin
     hooks:
       - id: trailing-whitespace
+        exclude: ^dist/
       - id: end-of-file-fixer
       - id: check-symlinks
       - id: detect-private-key
