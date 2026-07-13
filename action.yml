@@ -1,0 +1,60 @@
+name: Mise Update Tool
+description: Upgrade mise tools from the local config using `mise upgrade --bump --local` and optionally open one or more pull requests.
+branding:
+  icon: arrow-up-circle
+  color: blue
+
+inputs:
+  token:
+    description: GitHub token used to push commits and create pull requests.
+    required: true
+  tools:
+    description: Comma or newline separated list of tools to upgrade. Upgrades all local tools when empty.
+    required: false
+    default: ''
+  keep:
+    description: Comma or newline separated list of tools to exclude from the upgrade.
+    required: false
+    default: ''
+  working-directory:
+    description: Directory containing the mise local config.
+    required: false
+    default: ${{ github.workspace }}
+  create-pull-request:
+    description: Create a pull request when modified files are detected after the upgrade.
+    required: false
+    default: 'true'
+  branch-prefix:
+    description: Prefix for the pull request branch name.
+    required: false
+    default: chore/mise-tool-updates
+  pull-request-strategy:
+    description: |
+      How to open pull requests after upgrades.
+      Use `single` for one pull request with all upgraded tools, or `per-tool` for one pull request per tool.
+    required: false
+    default: single
+  pull-request-title:
+    description: |
+      Optional pull request title override. Supports placeholders:
+      `{tool}`, `{tools}`, `{previousVersion}`, `{nextVersion}`, `{previousRequested}`, `{nextRequested}`.
+    required: false
+    default: ''
+  commit-author-name:
+    description: Git commit author name used when creating pull request commits.
+    required: false
+  commit-author-email:
+    description: Git commit author email used when creating pull request commits.
+    required: false
+
+outputs:
+  changes-made:
+    description: Whether any files were modified by the upgrade.
+  updated-tools:
+    description: Tools selected for upgrade.
+  pull-request-urls:
+    description: Newline-separated URLs of all created pull requests.
+
+runs:
+  using: node24
+  main: dist/index.js

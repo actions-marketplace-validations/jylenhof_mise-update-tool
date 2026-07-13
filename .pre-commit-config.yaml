@@ -1,0 +1,114 @@
+---
+fail_fast: false
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+repos:
+  - repo: https://github.com/commit-check/commit-check
+    rev: v2.10.0
+    hooks:
+      - id: check-message
+      - id: check-branch
+      - id: check-author-name
+      - id: check-author-email
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-merge-conflict
+  - repo: local
+    hooks:
+      - id: editorconfig-checker # editorconfig-checker config
+        name: editorconfig-checker
+        entry: ec
+        language: system
+      - id: rumdl # markdown linter
+        name: rumdl
+        entry: "rumdl check"
+        language: system
+        files: '\.md$'
+      - id: tombi-format # toml formatter
+        name: "tombi format"
+        entry: "tombi format"
+        language: system
+        files: '\.toml$'
+      - id: tombi-lint # toml linter
+        name: "tombi lint"
+        entry: "tombi lint"
+        language: system
+        files: '\.toml$'
+      - id: shfmt # shell formatter
+        name: "shfmt"
+        entry: "shfmt"
+        language: system
+        files: '\.(sh|bash)$'
+      - id: shellcheck # shell linter
+        name: "shellcheck"
+        entry: "shellcheck"
+        language: system
+        files: '\.(sh|bash)$'
+
+
+      # github actions and workflows
+      - id: actionlint
+        name: actionlint
+        entry: actionlint
+        language: system
+        files: '(\.github/workflows/.*\.(yaml|yml)|\.github/actions/.+/action\.ya?ml$)'
+
+      # pinact does not handle branch version
+      # - id: pinact
+      #  name: pinact
+      #  entry: "pinact run -u --min-age 7 --verify-comment" # verify-comment does not handle branch version
+      #  language: system
+      #  files: '(\.github/workflows/.*\.(yaml|yml)|\.github/actions/.+/action\.ya?ml$|^action\.ya?ml$)'
+      #  pass_filenames: false
+      - id: ghalint
+        name: ghalint
+        entry: "ghalint run"
+        language: system
+        files: '(\.github/(workflows/.*|actions/.*/action)\.(yaml|yml)|^action\.ya?ml$|\.github/dependabot\.ya?ml$)'
+      - id: zizmor
+        name: zizmor
+        entry: zizmor
+        language: system
+        files: '(\.github/(workflows/.*|actions/.*/action|dependabot\.ya?ml))|(action\.ya?ml)$'
+
+      # github action development (aube + typescript + vite)
+      - id: aube-lockfile
+        name: aube lockfile sync
+        entry: aube install --frozen-lockfile
+        language: system
+        files: '(^package\.json$|^aube-lock\.yaml$|^aube-workspace\.yaml$|^pnpm-workspace\.yaml$|^biome\.json$)'
+        pass_filenames: false
+      - id: biome-check
+        name: biome lint and format
+        entry: aube exec biome check --write .
+        language: system
+        files: '(^src/.*\.tsx?$|^tests/.*\.tsx?$|^vite\.config\.ts$|^vitest\.config\.ts$|^biome\.json$|^package\.json$)'
+        pass_filenames: false
+      - id: typescript-check
+        name: TypeScript typecheck
+        entry: aube exec tsc --noEmit
+        language: system
+        files: '(^src/.*\.tsx?$|^tests/.*\.tsx?$|tsconfig.*\.json$|vite\.config\.ts$|vitest\.config\.ts$|biome\.json$|package\.json$)'
+        pass_filenames: false
+      - id: vitest
+        name: Vitest
+        entry: aube exec vitest run --coverage
+        language: system
+        files: '(^src/.*\.tsx?$|^tests/.*\.tsx?$|tsconfig.*\.json$|vite\.config\.ts$|vitest\.config\.ts$|biome\.json$|package\.json$)'
+        pass_filenames: false
+      - id: action-bundle
+        name: action bundle build
+        entry: bash -c 'aube exec vite build && git diff --quiet dist/ || { echo "dist/ is out of date; run \"aube exec vite build\" and stage dist/"; exit 1; }'
+        language: system
+        files: '(^src/.*\.tsx?$|tsconfig.*\.json$|vite\.config\.ts$|package\.json$)'
+        pass_filenames: false

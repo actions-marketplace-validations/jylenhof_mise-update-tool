@@ -1,0 +1,41 @@
+name: mise tool updates
+
+on:
+  workflow_dispatch:
+    inputs:
+      tools:
+        description: Comma separated tools to upgrade. Leave empty to upgrade all local tools.
+        required: false
+        default: ''
+      keep:
+        description: Comma separated tools to exclude from the upgrade.
+        required: false
+        default: ''
+      pull-request-strategy:
+        description: Use single for one PR with all tools, or per-tool for one PR per tool.
+        required: false
+        default: per-tool
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install mise
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+
+      - name: Upgrade local mise tools
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tools: ${{ inputs.tools }}
+          keep: ${{ inputs.keep }}

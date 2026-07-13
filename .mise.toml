@@ -1,0 +1,46 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[tools]  # tombi: format.rules.table-keys-order = "ascending"
+# Pin the Node.js version for the project
+node = "24"
+
+actionlint = "latest"
+aube = "latest"
+editorconfig-checker = "latest"
+ghalint = "latest"
+pinact = "latest"
+"pipx:gh-action-pulse" = { version = "latest", uvx = true }
+prek = "latest"
+rumdl = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+tombi = "latest"
+uv = "latest"
+yamllint = "latest"
+zizmor = "latest"
+
+[env]
+# Optional: if your action needs environment variables for local tests
+# (for example a test GitHub token or an API URL)
+GITHUB_OUTPUT = "./.github_output_test"
+
+[tasks.build]
+description = "Build the GitHub Action into a single executable file"
+# mise can run aube and vite because they are in the context
+run = "aube exec vite build"
+
+[tasks.test]
+description = "Run the unit test suite with Vitest"
+run = "aube exec vitest run --coverage"
+
+[tasks.test-watch]
+description = "Run tests in watch mode for active development"
+run = "aube exec vitest"
+
+[tasks.lint]
+description = "Lint and format-check TypeScript sources with Biome"
+run = "aube exec biome check ."
+
+[tasks.format]
+description = "Format TypeScript sources with Biome"
+run = "aube exec biome format --write ."
