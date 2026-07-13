@@ -25,6 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: "Cleaning up"
+        uses: gacts/run-and-post-run@598d7a875d5620e0457490555b5e18e46082aa47 # v1.4.4
+        with:
+          run: |
+            echo "Pre-Check Cleanup"
+            echo "~/.local" | xargs rm -rf
+          post: |
+            echo "Post-Check Cleanup"
+            echo "~/.local" | xargs rm -rf
+
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
