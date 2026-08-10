@@ -17,7 +17,7 @@ on:
       pull-request-strategy:
         description: Use single for one PR with all tools, or per-tool for one PR per tool.
         required: false
-        default: per-tool
+        default: single
 
 permissions:
   contents: write
@@ -61,5 +61,6 @@ jobs:
         uses: ./
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          tools: ${{ inputs.tools }}
-          keep: ${{ inputs.keep }}
+          tools: ${{ inputs.tools || '' }}
+          keep: ${{ inputs.keep || 'node' }}
+          pull-request-strategy: ${{ inputs.pull-request-strategy || 'single' }}
