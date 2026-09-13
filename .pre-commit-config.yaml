@@ -5,7 +5,7 @@ default_install_hook_types:
   - commit-msg
 repos:
   - repo: https://github.com/commit-check/commit-check
-    rev: v2.15.1
+    rev: v2.16.0
     hooks:
       - id: check-message
       - id: check-branch
@@ -30,7 +30,7 @@ repos:
       # hooks to use on all my projects
       - id: editorconfig-checker # editorconfig-checker config
         name: editorconfig-checker
-        entry: ec
+        entry: editorconfig-checker
         language: system
       - id: rumdl # markdown linter
         name: rumdl
@@ -76,7 +76,7 @@ repos:
         files: '\.github/workflows/.*\.(yaml|yml)$'
       - id: actionlint
         name: actionlint
-        entry: actionlint
+        entry: actionlint -ignore 'specifying action "\$/.+" in invalid format because ref is missing'
         language: system
         files: '\.github/workflows/.*\.(yaml|yml)$'
       # pinact does not handle branch version
@@ -98,8 +98,7 @@ repos:
         files: '(\.github/actions/.*/action\.ya?ml|action\.ya?ml)$'
       - id: zizmor
         name: zizmor
-        # limit scope because of bug: https://github.com/zizmorcore/zizmor/issues/2258
-        entry: "zizmor . --collect workflows,actions,dependabot"
+        entry: "zizmor ."
         language: system
         files: '(\.github/(workflows/.*|actions/.*/action|dependabot\.ya?ml))|(action\.ya?ml)$'
         pass_filenames: false

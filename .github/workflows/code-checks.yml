@@ -19,9 +19,18 @@ on:
         required: false
         type: boolean
         default: false
+      mise_version:
+        description: Override mise-action version option.
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   prek-checks:
@@ -32,7 +41,7 @@ jobs:
       contents: read
     steps:
       - name: "Cleaning up"
-        uses: gacts/run-and-post-run@598d7a875d5620e0457490555b5e18e46082aa47 # v1.4.4
+        uses: gacts/run-and-post-run@fc6503862aba998e2f2123225ad63c09a92ed46e # v1.4.5
         with:
           run: |
             echo "Pre-Check Cleanup"
@@ -47,12 +56,16 @@ jobs:
           persist-credentials: false
 
       - name: Set up mise
-        uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         env:
           MISE_INSTALL_FROM_GITHUB: 1
         with:
-          cache: false
-          version: ${{ vars.MISE_VERSION }}
+          # Disable cache on tag publishes so a poisoned mise cache cannot
+          # be restored into the uploaded distribution (zizmor
+          # cache-poisoning). PRs and branch pushes may still cache.
+          cache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          cache_key_prefix: mise-v1-code-checks.yml
+          version: ${{ inputs.mise_version || vars.MISE_VERSION }}
 
       - name: Run prek checks
         env:
@@ -69,7 +82,7 @@ jobs:
       - prek-checks
     steps:
       - name: "Cleaning up"
-        uses: gacts/run-and-post-run@598d7a875d5620e0457490555b5e18e46082aa47 # v1.4.4
+        uses: gacts/run-and-post-run@fc6503862aba998e2f2123225ad63c09a92ed46e # v1.4.5
         with:
           run: |
             echo "Pre-Check Cleanup"
@@ -84,19 +97,24 @@ jobs:
           persist-credentials: false
 
       - name: Set up mise
-        uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         env:
           MISE_INSTALL_FROM_GITHUB: 1
         with:
-          cache: false
-          version: ${{ vars.MISE_VERSION }}
+          # Disable cache on tag publishes so a poisoned mise cache cannot
+          # be restored into the uploaded distribution (zizmor
+          # cache-poisoning). PRs and branch pushes may still cache.
+          cache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          cache_key_prefix: mise-v1-code-checks.yml
+          version: ${{ inputs.mise_version || vars.MISE_VERSION }}
 
       - name: Build action bundle
         run: aube exec vite build
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1 # gh-action-pulse: ignore[max-age]
         if: startsWith(github.ref, 'refs/tags') || inputs.force_release == true
         with:
           name: action-distribution
           path: dist/
+          retention-days: 7
